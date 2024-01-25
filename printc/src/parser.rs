@@ -6,9 +6,9 @@ pub enum AstNode {
     PrintStatement(String),
 }
 
-/// Abstract Syntax Tree (AST) that represents the syntactic structure of source code. 
+/// Abstract Syntax Tree (AST) that represents the syntactic structure of source code.
 pub struct Ast {
-    nodes: Vec<AstNode>,
+    pub nodes: Vec<AstNode>,
 }
 
 impl Ast {
@@ -17,7 +17,9 @@ impl Ast {
         let mut nodes: Vec<AstNode> = Vec::new();
         for line in code.lines() {
             if line.starts_with(&format!("{} ", IDENTIFIER_PRINT)) {
-                let msg = line.trim_start_matches(&format!("{} ", IDENTIFIER_PRINT)).to_string();
+                let msg = line
+                    .trim_start_matches(&format!("{} ", IDENTIFIER_PRINT))
+                    .to_string();
                 nodes.push(AstNode::PrintStatement(msg));
             }
         }
