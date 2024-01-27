@@ -1,2 +1,2 @@
-mod codegen;
-mod parser;
+pub mod codegen;
+pub mod parser;
