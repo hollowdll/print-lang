@@ -26,18 +26,18 @@ pub fn generate_ir(ast: &Ast) -> LLVMString {
                 let format_str = context.const_string(format!("{}\n", msg).as_bytes(), false);
                 let format_str_global = module.add_global(format_str.get_type(), None, "format_string");
                 format_str_global.set_initializer(&format_str);
+                
+                // Create the main function
+                let main_func = module.add_function(MAIN_FN_NAME, context.i32_type().fn_type(&[], false), None);
+                let basic_block = context.append_basic_block(main_func, "entry");
+                
+                // Insert code to call printf with the format string
+                builder.position_at_end(basic_block);
                 let format_str_ptr = builder.build_pointer_cast(
                     format_str_global.as_pointer_value(),
                     i8_ptr_type,
                     "format_string_ptr",
                 ).unwrap();
-
-                // Create the main function
-                let main_func = module.add_function(MAIN_FN_NAME, context.i32_type().fn_type(&[], false), None);
-                let basic_block = context.append_basic_block(main_func, "entry");
-
-                // Insert code to call printf with the format string
-                builder.position_at_end(basic_block);
                 let _ = builder.build_call(printf_func, &[format_str_ptr.into()], PRINT_FN_NAME);
 
                 // Return 0
