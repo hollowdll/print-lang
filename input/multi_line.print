@@ -1,0 +1,4 @@
+println This source file contains four lines
+println This is line 2
+mul_int64 12345 54321
+mul_int64 99999999999999 9999999999999
