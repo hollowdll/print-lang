@@ -1,3 +1,5 @@
+use std::str::Chars;
+
 /// Tokens represent the smallest units of syntax.
 /// Tokens are grouped to categories.
 #[derive(Debug)]
@@ -25,8 +27,17 @@ pub enum Literal {
 /// Parser then takes the tokens and parses them into AST.
 /// 
 /// Converting source code into tokens makes the parser's job easier.
-pub struct Lexer {
+pub struct Lexer<'a> {
+    chars: Chars<'a>,
     position: usize,
+    next: Option<char>,
+}
+
+impl<'a> Lexer<'a> {
+    fn advance(&mut self) {
+        self.position += 1;
+        self.next = self.chars.next();
+    }
 }
 
 /// Converts source code into lexical tokens.
@@ -37,28 +48,44 @@ pub fn tokenize(input: &str) -> Vec<Token> {
     }
 
     let mut lexer = Lexer {
+        chars: input[..].chars(),
         position: 0,
+        next: None,
     };
-    let mut chars = input[..].chars();
+    lexer.next = lexer.chars.next();
 
     loop {
-        let next = chars.next();
-        if let Some(ch) = next {
+        if let Some(ch) = lexer.next {
             if ch.is_whitespace() {
                 continue
             }
             match ch {
-                ',' => tokens.push(Token::Delimiter(Delimiter::Comma)),
-                ';' => tokens.push(Token::Delimiter(Delimiter::Semicolon)),
+                ',' => {
+                    tokens.push(Token::Delimiter(Delimiter::Comma));
+                    lexer.advance();
+                },
+                ';' => {
+                    tokens.push(Token::Delimiter(Delimiter::Semicolon));
+                    lexer.advance();
+                },
+                '(' => {
+                    tokens.push(Token::Delimiter(Delimiter::LeftParen));
+                    lexer.advance();
+                },
+                ')' => {
+                    tokens.push(Token::Delimiter(Delimiter::RightParen));
+                    lexer.advance();
+                },
                 '"' => {
                     let pos_start = lexer.position;
                     let mut pos_end = pos_start;
         
                     loop {
-                        let next = chars.next();
-                        if let Some(ch) = next {
+                        lexer.advance();
+                        if let Some(ch) = lexer.next {
                             pos_end += 1;
                             if ch == '"' {
+                                lexer.advance();
                                 if pos_end - pos_start <= 1 {
                                     tokens.push(Token::Literal(Literal::String("".to_string())));
                                     break
@@ -73,11 +100,28 @@ pub fn tokenize(input: &str) -> Vec<Token> {
                         }
                     }
                 },
-                '(' => tokens.push(Token::Delimiter(Delimiter::LeftParen)),
-                ')' => tokens.push(Token::Delimiter(Delimiter::RightParen)),
-                _ => eprintln!("token error: unknown char: {}", ch),
+                _ => {
+                    if is_identifier(ch) {
+                        let pos_start = lexer.position;
+                        let mut pos_end = pos_start;
+            
+                        loop {
+                            lexer.advance();
+                            if let Some(ch) = lexer.next {
+                                pos_end += 1;
+                                if ch.is_whitespace() || ch == '(' {
+                                    tokens.push(Token::Identifier(input[pos_start..pos_end].to_string()));
+                                    break
+                                }
+                            } else {
+                                break
+                            }
+                        }
+                    } else {
+                        eprintln!("token error: unknown char: {}", ch);
+                    }
+                },
             }
-            lexer.position += 1;
         } else {
             break
         }
