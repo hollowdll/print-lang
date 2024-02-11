@@ -7,6 +7,7 @@ use inkwell::context::Context;
 use inkwell::execution_engine::{ExecutionEngine, JitFunction};
 use inkwell::module::Module;
 use inkwell::OptimizationLevel;
+use printc::lexer;
 use printc::parser::AstNode;
 use printc::parser::Parser;
 
@@ -75,6 +76,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             }
         }
     }
+
+    lexer::tokenize(&code);
 
     Ok(())
 }

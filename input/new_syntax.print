@@ -1,0 +1,2 @@
+println("Hello World!");
+mul_int64(25, 14);
