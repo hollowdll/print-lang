@@ -73,7 +73,8 @@ fn main() -> Result<(), Box<dyn Error>> {
             },
             AstNode::PrintStatement(msg) => {
                 println!("{}", msg)
-            }
+            },
+            _ => println!("Unknown statement"),
         }
     }
 
