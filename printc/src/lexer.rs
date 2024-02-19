@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::str::Chars;
 
 /// Tokens represent the smallest units of syntax.
@@ -99,8 +101,6 @@ pub fn tokenize(input: &str) -> Vec<Token> {
     };
     lexer.next = lexer.chars.next();
 
-    println!("Input:\n{:?}", lexer.input);
-
     loop {
         if let Some(ch) = lexer.next {
             if ch.is_whitespace() {
@@ -139,8 +139,6 @@ pub fn tokenize(input: &str) -> Vec<Token> {
             break
         }
     }
-
-    println!("\nTokens:\n{:?}", tokens);
 
     tokens
 }

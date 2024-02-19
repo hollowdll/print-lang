@@ -1,11 +1,11 @@
-use std::{slice::Iter, vec::IntoIter};
+use std::{io::{Error, ErrorKind}, vec::IntoIter};
+use crate::lexer::{Delimiter, Literal, Token};
 
-use crate::lexer::{Delimiter, Lexer, Token};
-
-const IDENTIFIER_PRINT: &str = "println";
+const IDENTIFIER_PRINTLN: &str = "println";
 const IDENTIFIER_MULTIPLY_INT64: &str = "mul_int64";
 
 /// Represents different types of nodes in the AST.
+#[derive(Debug)]
 pub enum AstNode {
     /// Statement to print text with new line.
     PrintStatement(String),
@@ -16,6 +16,7 @@ pub enum AstNode {
 }
 
 /// Abstract Syntax Tree (AST) that represents the syntactic structure of source code.
+#[derive(Debug)]
 pub struct Ast {
     pub nodes: Vec<AstNode>,
 }
@@ -26,14 +27,15 @@ impl Ast {
     }
 }
 
+// OLD
 impl Ast {
     /// Parses source code into AST.
     fn from_source(code: &str) -> Ast {
         let mut nodes: Vec<AstNode> = Vec::new();
         for line in code.lines() {
-            if line.starts_with(&format!("{} ", IDENTIFIER_PRINT)) {
+            if line.starts_with(&format!("{} ", IDENTIFIER_PRINTLN)) {
                 let msg = line
-                    .trim_start_matches(&format!("{} ", IDENTIFIER_PRINT))
+                    .trim_start_matches(&format!("{} ", IDENTIFIER_PRINTLN))
                     .to_string();
                 nodes.push(AstNode::PrintStatement(msg));
             } else if line.starts_with(&format!("{} ", IDENTIFIER_MULTIPLY_INT64)) {
@@ -52,6 +54,7 @@ impl Ast {
     }
 }
 
+/// Parser for parsing tokens into AST.
 pub struct Parser {
     tokens: IntoIter<Token>,
     current_token: Option<Token>,
@@ -69,23 +72,72 @@ impl Parser {
 }
 
 /// Parses tokens received from lexer into AST.
-pub fn parse_tokens(tokens: Vec<Token>) -> Ast {
+pub fn parse_tokens(tokens: Vec<Token>) -> Result<Ast, Error> {
     let mut nodes: Vec<AstNode> = Vec::new();
 
     if tokens.is_empty() {
-        return Ast::new(nodes);
+        return Ok(Ast::new(nodes));
     }
 
     let mut parser = Parser {
         tokens: tokens.into_iter(),
         current_token: None,
     };
-    parser.current_token = parser.tokens.next();
 
-    // TODO
+    // Advance tokens one by one
     loop {
-
+        parser.advance();
+        if let Some(token) = &parser.current_token {
+            match token {
+                Token::Identifier(ident) => {
+                    match ident.as_str() {
+                        IDENTIFIER_PRINTLN => {
+                            let arg;
+                            if let Some(token) = parser.tokens.next() {
+                                match token {
+                                    Token::Delimiter(Delimiter::LeftParen) => (),
+                                    _ => return Err(Error::new(ErrorKind::InvalidInput, "expected symbol '('")),
+                                }
+                            } else {
+                                return Err(Error::new(ErrorKind::InvalidInput, "expected symbol '('"));
+                            }
+                            if let Some(token) = parser.tokens.next() {
+                                match token {
+                                    Token::Literal(Literal::String(val)) => {
+                                        arg = val;
+                                    }
+                                    _ => return Err(Error::new(ErrorKind::InvalidInput, "expected string literal")),
+                                }
+                            } else {
+                                return Err(Error::new(ErrorKind::InvalidInput, "expected string literal"));
+                            }
+                            if let Some(token) = parser.tokens.next() {
+                                match token {
+                                    Token::Delimiter(Delimiter::RightParen) => (),
+                                    _ => return Err(Error::new(ErrorKind::InvalidInput, "expected symbol ')'")),
+                                }
+                            } else {
+                                return Err(Error::new(ErrorKind::InvalidInput, "expected symbol ')'"));
+                            }
+                            if let Some(token) = parser.tokens.next() {
+                                match token {
+                                    Token::Delimiter(Delimiter::Semicolon) => (),
+                                    _ => return Err(Error::new(ErrorKind::InvalidInput, "expected symbol ';'")),
+                                }
+                            } else {
+                                return Err(Error::new(ErrorKind::InvalidInput, "expected symbol ';'"));
+                            }
+                            nodes.push(AstNode::StatementPrintln(arg));
+                        },
+                        _ => return Err(Error::new(ErrorKind::InvalidInput, format!("unknown identifier '{}'", ident))),
+                    }
+                },
+                _ => return Err(Error::new(ErrorKind::InvalidInput, "unknown token")),
+            }
+        } else {
+            break
+        }
     }
 
-    Ast::new(nodes)
+    Ok(Ast::new(nodes))
 }

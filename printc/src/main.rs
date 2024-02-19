@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use std::env;
 use std::error::Error;
 use std::fs::read_to_string;
@@ -7,9 +9,7 @@ use inkwell::context::Context;
 use inkwell::execution_engine::{ExecutionEngine, JitFunction};
 use inkwell::module::Module;
 use inkwell::OptimizationLevel;
-use printc::lexer;
-use printc::parser::AstNode;
-use printc::parser::Parser;
+use printc::{lexer, parser};
 
 type MultiplyFunc = unsafe extern "C" fn(i64, i64) -> i64;
 
@@ -49,8 +49,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     let filename = &args[1];
-    let code = read_to_string(filename).expect("Error reading file");
-    let ast = Parser::construct_ast(&code);
+    let input = read_to_string(filename).expect("Error reading file");
+    // let ast = Parser::construct_ast(&code);
     
     let context = Context::create();
     let module = context.create_module("print_lang");
@@ -66,6 +66,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .jit_compile_multiply()
         .ok_or("Unable to JIT compile `multiply`")?;
 
+    /*
     for node in ast.nodes.into_iter() {
         match node {
             AstNode::MultiplyInt64Statement(x, y) => unsafe {
@@ -77,8 +78,18 @@ fn main() -> Result<(), Box<dyn Error>> {
             _ => println!("Unknown statement"),
         }
     }
+    */
 
-    lexer::tokenize(&code);
+    println!("Input:\n{:?}", &input);
+
+    let tokens = lexer::tokenize(&input);
+    println!("\nTokens:\n{:?}", tokens);
+
+    let ast = parser::parse_tokens(tokens);
+    match ast {
+        Ok(ast) => println!("\nAST:\n{:?}", ast),
+        Err(e) => eprintln!("\nsyntax error: {}", e),
+    }
 
     Ok(())
 }
