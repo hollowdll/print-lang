@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let filename = &args[1];
     let input = read_to_string(filename).expect("Error reading file");
     // let ast = Parser::construct_ast(&code);
-    
+
     let context = Context::create();
     let module = context.create_module("print_lang");
     let execution_engine = module.create_jit_execution_engine(OptimizationLevel::None)?;
