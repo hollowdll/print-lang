@@ -44,7 +44,7 @@ impl<'ctx> CodeGen<'ctx> {
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = env::args().collect();
 
-    if args.len() != 2 {
+    if args.len() < 2 {
         eprintln!("Usage: printc <input_file>");
         std::process::exit(1);
     }

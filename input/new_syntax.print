@@ -1,2 +1,2 @@
 println("Hello World!");
-mul_int64(25, 14);
+multiply(25, 14);
