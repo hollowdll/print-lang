@@ -84,3 +84,14 @@ Hello, world!
 println
 foo bar baz
 ```
+
+The output of using source code sample `input/syntax_error.print`:
+```
+Input:
+"println(\"Hello, world!\");\r\nprintln(\"this line has error\";\r\nprintln(\"asd\");"
+
+Tokens:
+[Token { line_num: 1, char_num: 1, kind: Identifier("println") }, Token { line_num: 1, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 1, char_num: 9, kind: Literal(String("Hello, world!")) }, Token { line_num: 1, char_num: 24, kind: Delimiter(RightParen) }, Token { line_num: 1, char_num: 25, kind: Delimiter(Semicolon) }, Token { line_num: 2, char_num: 1, kind: Identifier("println") }, Token { line_num: 2, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 2, char_num: 9, kind: Literal(String("this line has error")) }, Token { line_num: 2, char_num: 30, kind: Delimiter(Semicolon) }, Token { line_num: 3, char_num: 1, kind: Identifier("println") }, Token { line_num: 3, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 3, char_num: 9, kind: Literal(String("asd")) }, Token { line_num: 3, char_num: 14, kind: Delimiter(RightParen) }, Token { line_num: 3, char_num: 15, kind: Delimiter(Semicolon) }]
+
+syntax error: expected symbol ')' at line 2 char 30
+```
