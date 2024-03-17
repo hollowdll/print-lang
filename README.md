@@ -52,3 +52,35 @@ OR if you have built the binary with `cargo build`
 printc ../input/helloworld.print
 ```
 You need to pass a path to the file containing the source code.
+
+# Examples
+
+The output of using source code sample `input/helloworld.print`:
+```
+Input:
+"println(\"Hello world!\");"
+
+Tokens:
+[Token { line_num: 1, char_num: 1, kind: Identifier("println") }, Token { line_num: 1, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 1, char_num: 9, kind: Literal(String("Hello world!")) }, Token { line_num: 1, char_num: 23, kind: Delimiter(RightParen) }, Token { line_num: 1, char_num: 24, kind: Delimiter(Semicolon) }]
+
+AST:
+Ast { nodes: [StatementPrintln("Hello world!")] }
+
+Hello world!
+```
+
+The output of using source code sample `input/multi_line.print`:
+```
+Input:
+"println(\"Hello, world!\");\r\nprintln(\"println\");\r\nprintln(\"foo bar baz\");"
+
+Tokens:
+[Token { line_num: 1, char_num: 1, kind: Identifier("println") }, Token { line_num: 1, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 1, char_num: 9, kind: Literal(String("Hello, world!")) }, Token { line_num: 1, char_num: 24, kind: Delimiter(RightParen) }, Token { line_num: 1, char_num: 25, kind: Delimiter(Semicolon) }, Token { line_num: 2, char_num: 1, kind: Identifier("println") }, Token { line_num: 2, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 2, char_num: 9, kind: Literal(String("println")) }, Token { line_num: 2, char_num: 18, kind: Delimiter(RightParen) }, Token { line_num: 2, char_num: 19, kind: Delimiter(Semicolon) }, Token { line_num: 3, char_num: 1, kind: Identifier("println") }, Token { line_num: 3, char_num: 8, kind: Delimiter(LeftParen) }, Token { line_num: 3, char_num: 9, kind: Literal(String("foo bar baz")) }, Token { line_num: 3, char_num: 22, kind: Delimiter(RightParen) }, Token { line_num: 3, char_num: 23, kind: Delimiter(Semicolon) }]
+
+AST:
+Ast { nodes: [StatementPrintln("Hello, world!"), StatementPrintln("println"), StatementPrintln("foo bar baz")] }
+
+Hello, world!
+println
+foo bar baz
+```
