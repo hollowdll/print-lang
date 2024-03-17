@@ -9,6 +9,7 @@ use inkwell::context::Context;
 use inkwell::execution_engine::{ExecutionEngine, JitFunction};
 use inkwell::module::Module;
 use inkwell::OptimizationLevel;
+use printc::parser::AstNode;
 use printc::{lexer, parser};
 
 type MultiplyFunc = unsafe extern "C" fn(i64, i64) -> i64;
@@ -87,7 +88,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let ast = parser::parse_tokens(tokens);
     match ast {
-        Ok(ast) => println!("\nAST:\n{:?}", ast),
+        Ok(ast) => {
+            println!("\nAST:\n{:?}\n", ast);
+
+            for node in ast.nodes.into_iter() {
+                match node {
+                    AstNode::StatementPrintln(val) => println!("{}", val),
+                    _ => println!("unknown statement"),
+                }
+            }
+        },
         Err(e) => eprintln!("\nsyntax error: {}", e),
     }
 
